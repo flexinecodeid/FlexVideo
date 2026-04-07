@@ -8,7 +8,11 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Material Symbols (Google Icons) & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,7 +21,7 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Manrope', 'sans-serif'], heading: ['Poppins', 'sans-serif'], },
-                    colors: { brand: { 900: '#111111' }, red: { 600: '#e11d48' } }
+                    colors: { brand: { 900: '#0f172a' }, accent: { 500: '#ef4444', 600: '#dc2626' } }
                 }
             }
         }
@@ -27,106 +31,166 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        body { background-color: #f3f4f6; }
+        body { background-color: #f8fafc; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        .drop-zone { border: 2px dashed #cbd5e1; background-color: #f8fafc; transition: all 0.2s; }
-        .drop-zone.dragover { border-color: #e11d48; background-color: #fff1f2; }
+        
+        /* Modern Utilities */
+        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .hover-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hover-card:hover { transform: translateY(-4px); box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
+        
+        /* Dropzone Styling */
+        .drop-zone { border: 2px dashed #cbd5e1; background-color: #ffffff; transition: all 0.2s; }
+        .drop-zone:hover { border-color: #94a3b8; background-color: #f8fafc; }
+        .drop-zone.dragover { border-color: #ef4444; background-color: #fef2f2; transform: scale(1.02); }
+        
+        /* Icon adjustments */
+        .material-symbols-rounded { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-rounded.outlined { font-variation-settings: 'FILL' 0; }
     </style>
 </head>
-<body class="text-gray-800 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-900 selection:text-white">
+<body class="text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-900 selection:text-white">
 
     <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center flex-col gap-3">
-        <div class="w-10 h-10 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin"></div>
-        <p class="text-sm font-bold text-gray-500">Memuat FlexVideo...</p>
+    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center flex-col gap-4">
+        <div class="relative w-12 h-12">
+            <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+            <div class="absolute inset-0 rounded-full border-4 border-accent-600 border-t-transparent animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span class="material-symbols-rounded text-accent-600 text-xl">play_arrow</span>
+            </div>
+        </div>
+        <p class="text-sm font-bold text-slate-500 tracking-wide">Memuat FlexVideo...</p>
     </div>
 
     <!-- Navbar -->
-    <nav class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-            <button onclick="navigate('home')" class="font-heading text-xl font-bold text-brand-900 flex items-center gap-2">
-                <div class="w-8 h-8 bg-brand-900 text-white rounded-lg flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    <nav class="sticky top-0 z-40 glass-nav border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <button onclick="navigate('home')" class="font-heading text-xl sm:text-2xl font-extrabold text-brand-900 flex items-center gap-2 group">
+                <div class="w-9 h-9 bg-brand-900 text-white rounded-xl flex items-center justify-center shadow-md group-hover:bg-accent-600 transition-colors">
+                    <span class="material-symbols-rounded text-[22px]">play_circle</span>
                 </div>
-                <span>FlexVideo</span>
+                <span class="tracking-tight">FlexVideo</span>
             </button>
-            <div id="nav-actions" class="flex items-center gap-2"></div>
+            <div id="nav-actions" class="flex items-center gap-2 sm:gap-3"></div>
         </div>
     </nav>
 
     <main class="flex-grow w-full">
         <!-- ================= BERANDA ================= -->
-        <section id="view-home" class="hidden w-full py-6 md:py-10">
-            <div class="max-w-5xl mx-auto px-4">
-                <div class="text-center max-w-2xl mx-auto mb-8">
-                    <h1 class="font-heading text-3xl sm:text-4xl font-extrabold text-brand-900 mb-3 tracking-tight">
-                        Bagikan Video <span class="text-red-600">Instan.</span>
+        <section id="view-home" class="hidden w-full py-8 md:py-12">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="text-center max-w-2xl mx-auto mb-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent-50 text-accent-600 font-bold text-xs mb-4 border border-accent-100">
+                        <span class="material-symbols-rounded text-[14px]">bolt</span> Super Cepat
+                    </div>
+                    <h1 class="font-heading text-4xl sm:text-5xl font-extrabold text-brand-900 mb-4 tracking-tight leading-tight">
+                        Bagikan Video <span class="text-accent-600">Instan.</span>
                     </h1>
-                    <p class="text-sm text-gray-600 font-medium">Video Anda bersifat rahasia (Unlisted).</p>
+                    <p class="text-base text-slate-500 font-medium">Platform hosting video aman. Semua video Anda bersifat rahasia (Unlisted).</p>
                 </div>
-                <h2 class="font-bold text-lg text-gray-800 mb-4 border-b border-gray-200 pb-2">Koleksi Video Anda</h2>
-                <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-12"></div>
+                
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-6">
+                    <h2 class="font-heading font-bold text-xl text-slate-800 flex items-center gap-2">
+                        <span class="material-symbols-rounded text-slate-400">video_library</span> Koleksi Anda
+                    </h2>
+                </div>
+                
+                <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 pb-12"></div>
             </div>
         </section>
 
         <!-- ================= UPLOAD ================= -->
-        <section id="view-upload" class="hidden w-full py-6">
+        <section id="view-upload" class="hidden w-full py-8">
             <div class="max-w-2xl mx-auto px-4">
-                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-8">
-                    <h2 class="font-heading text-xl font-bold text-brand-900 mb-1">Unggah Video Baru</h2>
-                    <p class="text-gray-500 text-xs mb-6 font-medium">Format: MP4, WebM | Maksimal: 500MB.</p>
+                <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-6 sm:p-10 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-accent-50 rounded-bl-full -z-10 opacity-50"></div>
+                    
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-accent-100 text-accent-600 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-rounded">cloud_upload</span>
+                        </div>
+                        <div>
+                            <h2 class="font-heading text-2xl font-bold text-brand-900">Unggah Video</h2>
+                            <p class="text-slate-500 text-sm font-medium">MP4 atau WebM. Maksimal 500MB.</p>
+                        </div>
+                    </div>
                     
                     <form id="form-upload" onsubmit="handleUploadVideo(event)">
-                        <div id="drop-zone" class="drop-zone relative rounded-xl p-6 sm:p-10 mb-5 flex flex-col items-center justify-center cursor-pointer text-center">
+                        <div id="drop-zone" class="drop-zone relative rounded-2xl p-8 sm:p-12 mb-6 flex flex-col items-center justify-center cursor-pointer text-center group">
                             <input type="file" id="video-input" accept="video/mp4,video/webm" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="handleFileSelect(event)">
-                            <div id="upload-icon" class="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center mb-3 text-brand-900 shadow-sm">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <div id="upload-icon" class="w-16 h-16 bg-slate-50 group-hover:bg-accent-50 border border-slate-100 group-hover:border-accent-200 rounded-full flex items-center justify-center mb-4 text-slate-400 group-hover:text-accent-600 transition-all duration-300 shadow-sm">
+                                <span class="material-symbols-rounded text-[32px]">upload_file</span>
                             </div>
-                            <p id="file-name-display" class="font-bold text-sm sm:text-base text-brand-900 mb-1">Pilih Video / Ketuk di sini</p>
-                            <p id="file-size-display" class="text-xs text-gray-500">Maksimal 500MB</p>
-                            <div id="upload-progress-overlay" class="absolute inset-0 bg-white/95 z-20 flex flex-col items-center justify-center hidden">
-                                <div class="w-10 h-10 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin mb-3"></div>
-                                <p class="font-bold text-brand-900 text-sm">Sedang Mengunggah...</p>
+                            <p id="file-name-display" class="font-bold text-base sm:text-lg text-brand-900 mb-1 group-hover:text-accent-600 transition-colors">Pilih File / Seret ke sini</p>
+                            <p id="file-size-display" class="text-sm text-slate-400">Pilih video dari perangkat Anda</p>
+                            
+                            <div id="upload-progress-overlay" class="absolute inset-0 bg-white/95 backdrop-blur-sm z-20 flex flex-col items-center justify-center hidden rounded-2xl">
+                                <div class="relative w-14 h-14 mb-4">
+                                    <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                                    <div class="absolute inset-0 rounded-full border-4 border-accent-600 border-t-transparent animate-spin"></div>
+                                    <div class="absolute inset-0 flex items-center justify-center text-accent-600">
+                                        <span class="material-symbols-rounded animate-pulse">cloud_sync</span>
+                                    </div>
+                                </div>
+                                <p class="font-bold text-brand-900 text-lg">Mengunggah Video...</p>
+                                <p class="text-sm text-slate-500 font-medium mt-1">Harap jangan tutup halaman ini</p>
                             </div>
                         </div>
 
-                        <div class="mb-6">
-                            <label class="block text-xs font-bold text-gray-500 mb-2">JUDUL VIDEO</label>
-                            <input type="text" id="input-title" required placeholder="Tulis judul..." class="w-full text-base font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 focus:bg-white focus:border-red-600 outline-none">
+                        <div class="mb-8">
+                            <label class="block text-sm font-bold text-slate-600 mb-2 flex items-center gap-1.5">
+                                <span class="material-symbols-rounded text-[18px] text-slate-400">title</span> Judul Video
+                            </label>
+                            <input type="text" id="input-title" required placeholder="Contoh: Momen Liburan 2024" class="w-full text-base font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 focus:bg-white focus:border-accent-500 focus:ring-4 focus:ring-accent-500/10 outline-none transition-all">
                         </div>
                         
-                        <div class="flex flex-col-reverse sm:flex-row gap-2 pt-4 border-t border-gray-100">
-                            <button type="button" onclick="navigate('home')" class="w-full sm:w-auto px-6 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm">Batal</button>
-                            <button type="submit" id="btn-publish" class="w-full sm:flex-1 bg-brand-900 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">Dapatkan Link Video</button>
+                        <div class="flex flex-col-reverse sm:flex-row gap-3 pt-6 border-t border-slate-100">
+                            <button type="button" onclick="navigate('home')" class="w-full sm:w-auto px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-sm transition-colors">Batalkan</button>
+                            <button type="submit" id="btn-publish" class="w-full sm:flex-1 bg-brand-900 hover:bg-slate-800 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-brand-900/20">
+                                <span class="material-symbols-rounded text-[18px]">rocket_launch</span> Publikasikan Video
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </section>
 
-        <!-- ================= NONTON VIDEO & 404 NOT FOUND ================= -->
-        <section id="view-watch" class="hidden w-full py-4 sm:py-8">
-            <div class="max-w-3xl mx-auto px-4">
-                <div class="flex items-center justify-between mb-4">
-                    <button onclick="navigate('home')" class="text-sm font-bold text-gray-700 bg-white px-4 py-2 rounded-lg border border-gray-300 shadow-sm flex items-center gap-1.5"><span>←</span> Kembali</button>
+        <!-- ================= NONTON VIDEO & 404 ================= -->
+        <section id="view-watch" class="hidden w-full py-6 sm:py-10">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="navigate('home')" class="text-sm font-bold text-slate-600 bg-white hover:bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2 transition-all">
+                        <span class="material-symbols-rounded text-[18px]">arrow_back</span> Kembali
+                    </button>
                     <div id="watch-actions"></div>
                 </div>
 
                 <!-- AREA KONTEN -->
-                <div id="watch-content-area" class="bg-white border border-gray-200 shadow-sm rounded-xl p-3 sm:p-5">
-                    <div class="w-full aspect-video bg-black rounded-lg overflow-hidden mb-4">
-                        <video id="video-player" controls playsinline class="w-full h-full object-contain"><source id="video-source" src="" type="video/mp4"></video>
+                <div id="watch-content-area" class="bg-white border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl p-4 sm:p-6">
+                    <div class="w-full aspect-video bg-black rounded-xl overflow-hidden mb-5 shadow-inner relative group">
+                        <video id="video-player" controls playsinline class="w-full h-full object-contain bg-black">
+                            <source id="video-source" src="" type="video/mp4">
+                        </video>
                     </div>
-                    <h1 id="watch-title" class="font-heading text-lg sm:text-2xl font-bold text-brand-900 mb-3 break-words leading-tight">Memuat...</h1>
-                    <div class="flex items-center justify-between pt-3 border-t border-gray-100 flex-wrap gap-3">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-brand-900 text-white flex items-center justify-center text-xs font-bold" id="watch-avatar-letter">?</div>
+                    
+                    <h1 id="watch-title" class="font-heading text-xl sm:text-3xl font-bold text-brand-900 mb-4 break-words leading-tight">Memuat Judul...</h1>
+                    
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-100 flex-wrap gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-900 to-slate-600 text-white flex items-center justify-center text-sm font-bold shadow-md" id="watch-avatar-letter">?</div>
                             <div>
-                                <p id="watch-author" class="font-bold text-sm text-gray-900 leading-none">Loading</p>
-                                <p class="text-[10px] text-gray-500 font-medium mt-1"><span id="watch-date">...</span> • <span id="watch-views" class="font-bold">0</span> tayangan</p>
+                                <p id="watch-author" class="font-bold text-sm sm:text-base text-slate-800 leading-none mb-1">Loading Author</p>
+                                <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5">
+                                    <span id="watch-date">...</span> 
+                                    <span class="w-1 h-1 bg-slate-300 rounded-full"></span> 
+                                    <span class="flex items-center gap-1"><span class="material-symbols-rounded text-[14px]">visibility</span> <span id="watch-views" class="font-bold">0</span></span>
+                                </p>
                             </div>
                         </div>
-                        <button onclick="copyCurrentLink()" class="text-xs sm:text-sm bg-brand-900 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 active:scale-95 transition-transform">Salin Link</button>
+                        <button onclick="copyCurrentLink()" class="text-sm bg-accent-50 hover:bg-accent-100 text-accent-600 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 active:scale-95 transition-all">
+                            <span class="material-symbols-rounded text-[18px]">link</span> Salin Tautan
+                        </button>
                     </div>
                 </div>
             </div>
@@ -134,33 +198,83 @@
     </main>
 
     <!-- Modal Report Simple -->
-    <div id="report-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center px-4">
-        <div class="bg-white rounded-xl p-5 w-full max-w-sm shadow-xl">
-            <h3 class="font-heading text-lg font-bold text-brand-900 mb-1">Laporkan Video</h3>
-            <p class="text-xs text-gray-500 mb-4">Pilih alasan pelanggaran.</p>
+    <div id="report-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center px-4 transition-opacity">
+        <div class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-sm shadow-2xl transform transition-transform scale-100">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-rounded">flag</span>
+                </div>
+                <h3 class="font-heading text-xl font-bold text-brand-900">Lapor Video</h3>
+            </div>
+            <p class="text-sm text-slate-500 mb-6 font-medium">Bantu kami menjaga komunitas tetap aman.</p>
             
             <form onsubmit="submitReport(event)">
-                <div class="space-y-2 mb-5">
-                    <label class="block cursor-pointer"><input type="radio" name="report_reason" value="Kekerasan / Gore" class="peer hidden" required><div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🩸 Kekerasan / Gore</div></label>
-                    <label class="block cursor-pointer"><input type="radio" name="report_reason" value="Pornografi" class="peer hidden"><div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🔞 Pornografi</div></label>
-                    <label class="block cursor-pointer"><input type="radio" name="report_reason" value="Spam / Ilegal" class="peer hidden"><div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🤖 Spam / Konten Ilegal</div></label>
+                <div class="space-y-3 mb-6 text-slate-700">
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="report_reason" value="Kekerasan / Gore" class="peer hidden" required>
+                        <div class="px-4 py-3 border-2 border-slate-100 rounded-xl text-sm font-bold peer-checked:border-accent-500 peer-checked:bg-accent-50 flex items-center gap-3 transition-colors">
+                            <span class="material-symbols-rounded text-accent-500 text-[20px]">water_drop</span> Kekerasan / Gore
+                        </div>
+                    </label>
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="report_reason" value="Pornografi" class="peer hidden">
+                        <div class="px-4 py-3 border-2 border-slate-100 rounded-xl text-sm font-bold peer-checked:border-accent-500 peer-checked:bg-accent-50 flex items-center gap-3 transition-colors">
+                            <span class="material-symbols-rounded text-purple-500 text-[20px]">no_adult_content</span> Pornografi
+                        </div>
+                    </label>
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="report_reason" value="Spam / Ilegal" class="peer hidden">
+                        <div class="px-4 py-3 border-2 border-slate-100 rounded-xl text-sm font-bold peer-checked:border-accent-500 peer-checked:bg-accent-50 flex items-center gap-3 transition-colors">
+                            <span class="material-symbols-rounded text-blue-500 text-[20px]">warning</span> Spam / Ilegal
+                        </div>
+                    </label>
                 </div>
-                <div class="flex gap-2">
-                    <button type="button" onclick="closeReportModal()" class="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-bold text-sm">Batal</button>
-                    <button type="submit" id="btn-submit-report" class="flex-1 py-2.5 bg-red-600 text-white rounded-lg font-bold text-sm">Kirim</button>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeReportModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-sm transition-colors">Batal</button>
+                    <button type="submit" id="btn-submit-report" class="flex-1 py-3 bg-accent-600 hover:bg-accent-700 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-accent-600/20">Kirim Laporan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Toast Anti-Lag -->
-    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 transition-all duration-300 bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-lg text-xs font-bold z-[60] flex items-center gap-1.5">
-        <span id="toast-icon">✅</span> <span id="toast-msg">Sukses!</span>
+    <!-- Custom Alert Modal -->
+    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] hidden flex items-center justify-center px-4">
+        <div class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-sm shadow-2xl text-center transform scale-95 opacity-0 transition-all duration-200" id="custom-alert-box">
+            <div id="alert-icon-container" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4">
+                <span id="alert-icon" class="material-symbols-rounded text-[32px]">info</span>
+            </div>
+            <h3 id="alert-title" class="font-heading text-xl font-bold text-brand-900 mb-2">Pemberitahuan</h3>
+            <p id="alert-message" class="text-sm text-slate-500 font-medium mb-6">Pesan alert di sini.</p>
+            <button onclick="closeCustomAlert()" class="w-full py-3 bg-brand-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm transition-colors">Mengerti</button>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] hidden flex items-center justify-center px-4">
+        <div class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-sm shadow-2xl text-center transform scale-95 opacity-0 transition-all duration-200" id="custom-confirm-box">
+            <div class="w-16 h-16 bg-red-50 text-accent-600 mx-auto rounded-full flex items-center justify-center mb-4">
+                <span class="material-symbols-rounded text-[32px]">delete_forever</span>
+            </div>
+            <h3 id="confirm-title" class="font-heading text-xl font-bold text-brand-900 mb-2">Konfirmasi</h3>
+            <p id="confirm-message" class="text-sm text-slate-500 font-medium mb-6">Apakah Anda yakin?</p>
+            <div class="flex gap-3">
+                <button onclick="resolveConfirm(false)" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-sm transition-colors">Batal</button>
+                <button onclick="resolveConfirm(true)" class="flex-1 py-3 bg-accent-600 hover:bg-accent-700 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-accent-600/20">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern Toast -->
+    <div id="toast" class="fixed bottom-6 sm:bottom-10 left-1/2 transform -translate-x-1/2 translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white px-5 py-3.5 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] text-sm font-bold z-[80] flex items-center gap-3 border border-slate-700 min-w-[280px]">
+        <div id="toast-icon-wrapper" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10">
+            <span id="toast-icon" class="material-symbols-rounded text-[18px]">check</span>
+        </div>
+        <span id="toast-msg" class="tracking-wide">Pesan sukses!</span>
     </div>
 
     <script>
         // ==========================================
-        // KONFIGURASI SUPABASE (TANPA TOKEN TELEGRAM)
+        // KONFIGURASI SUPABASE (TIDAK DIUBAH)
         // ==========================================
         const SUPABASE_URL = 'https://tixewjhttuhzkhbegwwv.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpeGV3amh0dHVoemtoYmVnd3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjEyOTIsImV4cCI6MjA5MDE5NzI5Mn0.0Hs7yH3ppbzNyp4LUJknyBX7DcDkO6MWqj57NhT_trg';
@@ -169,11 +283,84 @@
         const BUCKET_NAME = 'flexvideo-uploads'; 
 
         let userVideosList = []; let currentUser = null; let selectedFile = null; let currentWatchId = null;
+        let confirmResolver = null;
 
         function escapeHTML(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
 
         document.addEventListener('DOMContentLoaded', () => { initAuth(); setupDragAndDrop(); });
 
+        // ==========================================
+        // CUSTOM MODALS LOGIC
+        // ==========================================
+        function customAlert(message, title = "Pemberitahuan", type = "info") {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('custom-alert-modal');
+                const box = document.getElementById('custom-alert-box');
+                const iconContainer = document.getElementById('alert-icon-container');
+                const icon = document.getElementById('alert-icon');
+                
+                document.getElementById('alert-title').textContent = title;
+                document.getElementById('alert-message').textContent = message;
+
+                if (type === 'error') {
+                    iconContainer.className = "w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 bg-red-50 text-accent-600";
+                    icon.textContent = "error";
+                } else if (type === 'warning') {
+                    iconContainer.className = "w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 bg-orange-50 text-orange-500";
+                    icon.textContent = "warning";
+                } else {
+                    iconContainer.className = "w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 bg-blue-50 text-blue-500";
+                    icon.textContent = "info";
+                }
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    box.classList.remove('scale-95', 'opacity-0');
+                    box.classList.add('scale-100', 'opacity-100');
+                }, 10);
+
+                window.closeCustomAlert = () => {
+                    box.classList.remove('scale-100', 'opacity-100');
+                    box.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => { modal.classList.add('hidden'); resolve(); }, 200);
+                };
+            });
+        }
+
+        function customConfirm(message, title = "Konfirmasi") {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('custom-confirm-modal');
+                const box = document.getElementById('custom-confirm-box');
+                
+                document.getElementById('confirm-title').textContent = title;
+                document.getElementById('confirm-message').textContent = message;
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    box.classList.remove('scale-95', 'opacity-0');
+                    box.classList.add('scale-100', 'opacity-100');
+                }, 10);
+
+                confirmResolver = resolve;
+            });
+        }
+
+        function resolveConfirm(result) {
+            const modal = document.getElementById('custom-confirm-modal');
+            const box = document.getElementById('custom-confirm-box');
+            
+            box.classList.remove('scale-100', 'opacity-100');
+            box.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { 
+                modal.classList.add('hidden'); 
+                if (confirmResolver) confirmResolver(result);
+                confirmResolver = null;
+            }, 200);
+        }
+
+        // ==========================================
+        // AUTHENTICATION & NAVIGATION
+        // ==========================================
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             currentUser = session?.user || null;
@@ -189,9 +376,24 @@
             const nav = document.getElementById('nav-actions');
             if (currentUser) {
                 const name = escapeHTML(currentUser.user_metadata.full_name || 'User').split(' ')[0];
-                nav.innerHTML = `<span class="hidden sm:inline text-xs font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">${name}</span><button onclick="logout()" class="text-xs text-red-600 font-bold px-3 py-1.5 bg-red-50 rounded-lg">Keluar</button><button onclick="navigate('upload')" class="bg-brand-900 text-white px-3 py-1.5 rounded-lg font-bold text-xs">Unggah</button>`;
+                nav.innerHTML = `
+                    <div class="hidden sm:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                        <span class="material-symbols-rounded text-slate-400 text-[18px]">person</span>
+                        <span class="text-sm font-bold text-slate-700">${name}</span>
+                    </div>
+                    <button onclick="logout()" class="text-sm text-slate-500 hover:text-accent-600 hover:bg-red-50 font-bold px-3 py-2 rounded-xl transition-colors" title="Keluar">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                    <button onclick="navigate('upload')" class="bg-brand-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm transition-colors">
+                        <span class="material-symbols-rounded text-[18px]">add</span> <span class="hidden sm:inline">Unggah</span>
+                    </button>
+                `;
             } else {
-                nav.innerHTML = `<button onclick="loginWithGoogle()" class="bg-brand-900 text-white px-4 py-1.5 rounded-lg font-bold text-xs">Login Google</button>`;
+                nav.innerHTML = `
+                    <button onclick="loginWithGoogle()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm transition-colors">
+                        <i class="fa-brands fa-google text-accent-500"></i> Login Google
+                    </button>
+                `;
             }
         }
 
@@ -214,14 +416,49 @@
             if (viewName === 'home') { document.getElementById('loading-screen').classList.add('hidden'); renderGrid(); resetFileUploadUI(); }
         }
 
+        // ==========================================
+        // GRID RENDER
+        // ==========================================
         function renderGrid() {
             const grid = document.getElementById('video-grid');
-            if (!currentUser) return grid.innerHTML = `<div class="col-span-full text-center py-10 bg-white border border-gray-200 rounded-xl text-sm text-gray-500 font-bold">Login untuk kelola video.</div>`;
-            if (userVideosList.length === 0) return grid.innerHTML = `<div class="col-span-full text-center py-10 bg-white border border-gray-200 rounded-xl text-sm text-gray-500 font-bold">Belum ada video.</div>`;
+            if (!currentUser) {
+                return grid.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-white border border-slate-200 rounded-2xl flex flex-col items-center">
+                        <div class="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-4"><span class="material-symbols-rounded text-4xl">lock</span></div>
+                        <h3 class="font-bold text-lg text-slate-700 mb-1">Akses Terkunci</h3>
+                        <p class="text-sm text-slate-500 font-medium mb-4">Silakan login untuk mengelola video Anda.</p>
+                        <button onclick="loginWithGoogle()" class="bg-brand-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm"><i class="fa-brands fa-google"></i> Login Sekarang</button>
+                    </div>`;
+            }
+            if (userVideosList.length === 0) {
+                return grid.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-white border border-slate-200 rounded-2xl flex flex-col items-center">
+                        <div class="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-4"><span class="material-symbols-rounded text-4xl">videocam_off</span></div>
+                        <h3 class="font-bold text-lg text-slate-700 mb-1">Belum ada video</h3>
+                        <p class="text-sm text-slate-500 font-medium mb-4">Mulai unggah video pertama Anda sekarang.</p>
+                        <button onclick="navigate('upload')" class="bg-brand-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm"><span class="material-symbols-rounded text-[18px]">upload</span> Unggah Video</button>
+                    </div>`;
+            }
             
             let html = '';
             userVideosList.forEach(vid => {
-                html += `<div class="bg-white border border-gray-200 p-3 rounded-xl flex flex-col active:scale-95 transition-transform" onclick="window.location.href='?v=${vid.id}'"><div class="w-full aspect-video bg-gray-900 rounded-lg mb-2 relative flex items-center justify-center overflow-hidden"><div class="absolute bottom-1 left-1 text-white text-[9px] bg-black/60 px-1.5 py-0.5 rounded font-bold">👁 ${vid.views || 0}</div><div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center shadow-sm"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="ml-0.5"><path d="M8 5v14l11-7z"/></svg></div></div><h3 class="text-sm font-bold text-gray-900 truncate mb-1">${escapeHTML(vid.title)}</h3><div class="flex items-center justify-between text-[10px] text-gray-400 font-bold"><span>#${vid.id}</span><span>${vid.date}</span></div></div>`;
+                html += `
+                <div class="hover-card bg-white border border-slate-200 p-3 rounded-2xl flex flex-col cursor-pointer group" onclick="window.location.href='?v=${vid.id}'">
+                    <div class="w-full aspect-video bg-slate-900 rounded-xl mb-3 relative flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                        <div class="absolute bottom-2 right-2 text-white text-[10px] bg-black/70 px-2 py-1 rounded-md font-bold flex items-center gap-1 backdrop-blur-sm">
+                            <span class="material-symbols-rounded text-[12px]">visibility</span> ${vid.views || 0}
+                        </div>
+                        <div class="w-10 h-10 bg-white/90 text-brand-900 rounded-full flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-110 transition-transform backdrop-blur-sm">
+                            <span class="material-symbols-rounded text-[20px]">play_arrow</span>
+                        </div>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-800 truncate mb-1.5 group-hover:text-accent-600 transition-colors">${escapeHTML(vid.title)}</h3>
+                    <div class="flex items-center justify-between text-xs text-slate-400 font-semibold">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded text-[10px]">#${vid.id}</span>
+                        <span>${vid.date}</span>
+                    </div>
+                </div>`;
             });
             grid.innerHTML = html;
         }
@@ -237,34 +474,82 @@
             ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, () => dz.classList.remove('dragover'), false));
             dz.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
         }
+        
         function handleFileSelect(e) { handleFiles(e.target.files); }
-        function handleFiles(files) {
+        
+        async function handleFiles(files) {
             if (files.length === 0) return;
             const file = files[0];
-            if (!['video/mp4', 'video/webm'].includes(file.type)) return alert("Format MP4/WebM saja.");
-            if (file.size > 500 * 1024 * 1024) return alert("Maks 500MB!"); 
+            if (!['video/mp4', 'video/webm'].includes(file.type)) {
+                await customAlert("Format file tidak didukung. Harap unggah format MP4 atau WebM.", "Format Tidak Sesuai", "error");
+                return;
+            }
+            if (file.size > 500 * 1024 * 1024) {
+                await customAlert("Ukuran video melebihi batas maksimal 500MB!", "File Terlalu Besar", "error");
+                return;
+            }
             selectedFile = file;
             document.getElementById('file-name-display').textContent = file.name;
+            document.getElementById('file-name-display').classList.add('text-accent-600');
             document.getElementById('file-size-display').textContent = (file.size / (1024*1024)).toFixed(1) + " MB";
-            const ti = document.getElementById('input-title'); if(ti.value.trim()==='') ti.value = file.name.replace(/\.[^/.]+$/, "");
+            const ti = document.getElementById('input-title'); 
+            if(ti.value.trim() === '') ti.value = file.name.replace(/\.[^/.]+$/, "");
         }
-        function resetFileUploadUI() { selectedFile = null; if(document.getElementById('form-upload')) document.getElementById('form-upload').reset(); document.getElementById('file-name-display').textContent = "Pilih Video"; document.getElementById('upload-progress-overlay').classList.add('hidden'); document.getElementById('btn-publish').disabled = false; }
+        
+        function resetFileUploadUI() { 
+            selectedFile = null; 
+            if(document.getElementById('form-upload')) document.getElementById('form-upload').reset(); 
+            const nameDisplay = document.getElementById('file-name-display');
+            nameDisplay.textContent = "Pilih File / Seret ke sini"; 
+            nameDisplay.classList.remove('text-accent-600');
+            document.getElementById('file-size-display').textContent = "Pilih video dari perangkat Anda";
+            document.getElementById('upload-progress-overlay').classList.add('hidden'); 
+            document.getElementById('btn-publish').disabled = false; 
+        }
 
         async function handleUploadVideo(e) {
-            e.preventDefault(); if(!currentUser) return loginWithGoogle(); if(!selectedFile) return alert("Pilih video!");
-            const btn = document.getElementById('btn-publish'); const overlay = document.getElementById('upload-progress-overlay');
+            e.preventDefault(); 
+            if(!currentUser) return loginWithGoogle(); 
+            if(!selectedFile) {
+                await customAlert("Pilih video terlebih dahulu sebelum mempublikasikan!", "Video Belum Dipilih", "warning");
+                return;
+            }
+            
+            const btn = document.getElementById('btn-publish'); 
+            const overlay = document.getElementById('upload-progress-overlay');
             btn.disabled = true; overlay.classList.remove('hidden');
-            const fileExt = selectedFile.name.split('.').pop(); const shortId = Math.random().toString(36).substr(2, 6); 
+            
+            const fileExt = selectedFile.name.split('.').pop(); 
+            const shortId = Math.random().toString(36).substr(2, 6); 
             const uniqueName = `${currentUser.id}/${Date.now()}_${shortId}.${fileExt}`;
+            
             try {
                 const { error: err1 } = await supabaseClient.storage.from(BUCKET_NAME).upload(uniqueName, selectedFile, { cacheControl: '3600', upsert: false });
-                if (err1) throw new Error("Gagal unggah.");
+                if (err1) throw new Error("Gagal mengunggah file video ke server.");
+                
                 const { data: urlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(uniqueName);
-                const newVideo = { id: shortId, user_id: currentUser.id, title: document.getElementById('input-title').value.trim(), author: currentUser.user_metadata.full_name, video_url: urlData.publicUrl, file_path: uniqueName, date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }), timestamp: Date.now(), views: 0 };
+                
+                const newVideo = { 
+                    id: shortId, 
+                    user_id: currentUser.id, 
+                    title: document.getElementById('input-title').value.trim(), 
+                    author: currentUser.user_metadata.full_name, 
+                    video_url: urlData.publicUrl, 
+                    file_path: uniqueName, 
+                    date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }), 
+                    timestamp: Date.now(), 
+                    views: 0 
+                };
+                
                 const { error: err2 } = await supabaseClient.from('videos').insert([newVideo]);
                 if (err2) throw err2;
+                
                 window.location.href = `?v=${shortId}`; 
-            } catch (err) { alert(err.message); btn.disabled = false; overlay.classList.add('hidden'); }
+            } catch (err) { 
+                await customAlert(err.message, "Gagal Mengunggah", "error"); 
+                btn.disabled = false; 
+                overlay.classList.add('hidden'); 
+            }
         }
 
         async function loadSingleVideo(id) {
@@ -276,11 +561,15 @@
                     document.getElementById('loading-screen').classList.add('hidden');
                     document.getElementById('watch-actions').innerHTML = '';
                     document.getElementById('watch-content-area').innerHTML = `
-                        <div class="text-center py-16 px-4">
-                            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">🗑️</div>
-                            <h1 class="text-3xl font-extrabold text-brand-900 mb-2">Video Tidak Ditemukan</h1>
-                            <p class="text-sm text-gray-500 font-medium mb-8">Video ini mungkin telah dihapus oleh pemiliknya atau diturunkan oleh Admin karena melanggar pedoman.</p>
-                            <button onclick="navigate('home')" class="bg-brand-900 text-white px-6 py-3 rounded-xl font-bold">Kembali ke Beranda</button>
+                        <div class="text-center py-20 px-4">
+                            <div class="w-24 h-24 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-5">
+                                <span class="material-symbols-rounded text-5xl">delete_forever</span>
+                            </div>
+                            <h1 class="text-2xl sm:text-3xl font-heading font-extrabold text-brand-900 mb-3">Video Tidak Ditemukan</h1>
+                            <p class="text-base text-slate-500 font-medium mb-8 max-w-md mx-auto">Video ini mungkin telah dihapus oleh pemiliknya atau diturunkan oleh sistem karena melanggar pedoman.</p>
+                            <button onclick="navigate('home')" class="bg-brand-900 hover:bg-slate-800 transition-colors text-white px-6 py-3.5 rounded-xl font-bold flex items-center gap-2 mx-auto shadow-lg">
+                                <span class="material-symbols-rounded">home</span> Kembali ke Beranda
+                            </button>
                         </div>
                     `;
                     navigate('watch', false);
@@ -304,35 +593,51 @@
 
                 const actionsDiv = document.getElementById('watch-actions');
                 if (currentUser && currentUser.id === video.user_id) {
-                    actionsDiv.innerHTML = `<button onclick="deleteVideo('${video.id}', '${video.file_path}')" class="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg font-bold">Hapus</button>`;
+                    actionsDiv.innerHTML = `<button onclick="deleteVideo('${video.id}', '${video.file_path}')" class="text-sm bg-red-50 hover:bg-red-100 text-accent-600 border border-red-100 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors"><span class="material-symbols-rounded text-[18px]">delete</span> Hapus</button>`;
                 } else {
-                    actionsDiv.innerHTML = `<button onclick="openReportModal()" class="text-xs bg-gray-100 text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg font-bold">Lapor</button>`;
+                    actionsDiv.innerHTML = `<button onclick="openReportModal()" class="text-sm bg-slate-50 hover:bg-slate-100 text-slate-500 border border-slate-200 px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors"><span class="material-symbols-rounded text-[18px]">flag</span> Lapor</button>`;
                 }
                 navigate('watch', false);
-            } catch (error) { alert("Terjadi kesalahan."); navigate('home'); }
+            } catch (error) { 
+                await customAlert("Terjadi kesalahan saat memuat video dari server.", "Gagal Memuat", "error"); 
+                navigate('home'); 
+            }
         }
 
         async function deleteVideo(id, filePath) {
-            if (!confirm("Hapus video ini permanen?")) return;
-            showToast("Menghapus...", "⏳");
-            try { await supabaseClient.storage.from(BUCKET_NAME).remove([filePath]); await supabaseClient.from('videos').delete().eq('id', id); window.location.href = window.location.pathname; } catch (e) { alert("Gagal."); }
+            const isConfirmed = await customConfirm("Apakah Anda yakin ingin menghapus video ini secara permanen? Tindakan ini tidak dapat dibatalkan.", "Hapus Video");
+            if (!isConfirmed) return;
+            
+            showToast("Menghapus video...", "hourglass_empty");
+            try { 
+                await supabaseClient.storage.from(BUCKET_NAME).remove([filePath]); 
+                await supabaseClient.from('videos').delete().eq('id', id); 
+                window.location.href = window.location.pathname; 
+            } catch (e) { 
+                await customAlert("Gagal menghapus video. Coba lagi nanti.", "Error", "error"); 
+            }
         }
 
         // ==========================================
-        // REPORT SYSTEM PURE SUPABASE
+        // REPORT SYSTEM
         // ==========================================
-        function openReportModal() { if(!currentUser) return loginWithGoogle(); document.getElementById('report-modal').classList.remove('hidden'); }
-        function closeReportModal() { document.getElementById('report-modal').classList.add('hidden'); }
+        function openReportModal() { 
+            if(!currentUser) return loginWithGoogle(); 
+            document.getElementById('report-modal').classList.remove('hidden'); 
+        }
+        
+        function closeReportModal() { 
+            document.getElementById('report-modal').classList.add('hidden'); 
+        }
 
         async function submitReport(e) {
             e.preventDefault();
             const reason = document.querySelector('input[name="report_reason"]:checked').value;
             const btn = document.getElementById('btn-submit-report');
-            btn.innerHTML = "Mengirim..."; btn.disabled = true;
+            btn.innerHTML = `<span class="material-symbols-rounded animate-spin text-[18px]">sync</span> Mengirim...`; 
+            btn.disabled = true;
 
             try {
-                // CUKUP SIMPAN KE SUPABASE. 
-                // Bot Node.js kamu yang jalan 24 jam akan otomatis mendeteksinya via Realtime!
                 const report = { 
                     video_id: currentWatchId, 
                     reporter_name: currentUser.user_metadata.full_name, 
@@ -344,17 +649,45 @@
                 if(error) throw error;
 
                 closeReportModal();
-                showToast("Laporan terkirim ke Admin.", "🛡️");
+                showToast("Laporan terkirim ke Admin.", "security");
             } catch (error) { 
-                alert("Gagal lapor. Pastikan koneksi lancar."); 
+                await customAlert("Gagal mengirim laporan. Pastikan koneksi lancar.", "Gagal", "error"); 
             }
-            btn.innerHTML = "Kirim"; btn.disabled = false;
+            btn.innerHTML = "Kirim Laporan"; btn.disabled = false;
         }
 
-        function showToast(msg, icon = "✅") { const toast = document.getElementById('toast'); document.getElementById('toast-icon').textContent = icon; document.getElementById('toast-msg').textContent = msg; toast.classList.remove('translate-y-full', 'opacity-0'); setTimeout(() => toast.classList.add('translate-y-full', 'opacity-0'), 2500); }
-        function copyCurrentLink() { const t = document.createElement("textarea"); t.value = window.location.href; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); showToast("Link disalin!", "🔗"); }
+        // ==========================================
+        // UI UTILITIES
+        // ==========================================
+        function showToast(msg, iconName = "check") { 
+            const toast = document.getElementById('toast'); 
+            const icon = document.getElementById('toast-icon');
+            
+            icon.textContent = iconName; 
+            if(iconName === "error") {
+                document.getElementById('toast-icon-wrapper').className = "w-8 h-8 rounded-full flex items-center justify-center bg-red-500/20 text-red-400";
+            } else if (iconName === "hourglass_empty") {
+                document.getElementById('toast-icon-wrapper').className = "w-8 h-8 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-400";
+            } else {
+                document.getElementById('toast-icon-wrapper').className = "w-8 h-8 rounded-full flex items-center justify-center bg-green-500/20 text-green-400";
+            }
+
+            document.getElementById('toast-msg').textContent = msg; 
+            
+            toast.classList.remove('translate-y-20', 'opacity-0'); 
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000); 
+        }
+        
+        function copyCurrentLink() { 
+            const t = document.createElement("textarea"); 
+            t.value = window.location.href; 
+            document.body.appendChild(t); 
+            t.select(); 
+            document.execCommand('copy'); 
+            document.body.removeChild(t); 
+            showToast("Tautan berhasil disalin!", "link"); 
+        }
     </script>
 </body>
 </html>
-
 
