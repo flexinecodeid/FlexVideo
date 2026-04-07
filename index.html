@@ -1,0 +1,245 @@
+const { createCanvas } = require('canvas');
+const fs = require('fs');
+const path = require('path');
+
+// Menyimpan state pendaftaran user sementara
+const vipSessions = {};
+
+// Harga VIP
+const VIP_PRICES = {
+    bimsi: 10000,
+    giko: 20000,
+    gaku: 35000
+};
+
+// ==========================================
+// 1. ALUR PENDAFTARAN VIP (STATE MACHINE)
+// ==========================================
+function startRegistration(bot, chatId) {
+    vipSessions[chatId] = { step: 'NAMA', data: {} };
+    bot.sendMessage(chatId, `🌟 *PENDAFTARAN FLEXINE VIP CARD*\n\nMari kita buat kartu VIP eksklusif Anda. Harap isi data dengan benar.\n\n👤 *Siapa Nama Panggilan Anda?*\n_(Ketik dan kirimkan nama Anda di bawah)_`, { parse_mode: 'Markdown' });
+}
+
+async function handleInput(bot, msg) {
+    const chatId = msg.chat.id;
+    const text = msg.text;
+    const sess = vipSessions[chatId];
+
+    if (!sess || !text || text.startsWith('/')) return false; // Abaikan jika bukan proses VIP
+
+    switch (sess.step) {
+        case 'NAMA':
+            sess.data.nama = text;
+            sess.step = 'UMUR';
+            bot.sendMessage(chatId, `Halo *${text}*! 👋\n\n🎂 *Berapa Umur Anda sekarang?*\n_(Contoh: 21)_`, { parse_mode: 'Markdown' });
+            break;
+            
+        case 'UMUR':
+            if (isNaN(text)) return bot.sendMessage(chatId, '⚠️ Harap masukkan angka saja untuk umur!');
+            sess.data.umur = text;
+            sess.step = 'TGL_LAHIR';
+            bot.sendMessage(chatId, `📅 *Kapan Tanggal Lahir Anda?*\n_(Format: DD-MM-YYYY, Contoh: 17-08-2005)_`, { parse_mode: 'Markdown' });
+            break;
+
+        case 'TGL_LAHIR':
+            sess.data.tglLahir = text;
+            sess.step = 'EMAIL';
+            bot.sendMessage(chatId, `📧 *Masukkan Alamat Email Anda:*\n_(Pastikan aktif untuk menerima notifikasi PDF Kartu & Akses 18+)_`, { parse_mode: 'Markdown' });
+            break;
+
+        case 'EMAIL':
+            if (!text.includes('@')) return bot.sendMessage(chatId, '⚠️ Format email tidak valid!');
+            sess.data.email = text;
+            sess.data.tgId = chatId; // ID Telegram diambil otomatis
+            sess.step = 'KELAMIN';
+            
+            const genderMenu = {
+                inline_keyboard: [
+                    [{ text: '👨 Pria', callback_data: 'vip_gen_pria' }, { text: '👩 Wanita', callback_data: 'vip_gen_wanita' }]
+                ]
+            };
+            bot.sendMessage(chatId, `🚻 *Pilih Jenis Kelamin Anda:*`, { reply_markup: genderMenu });
+            break;
+
+        case 'ASAL':
+            sess.data.asal = text;
+            sess.step = 'DONE';
+            
+            // Proses selesai, tampilkan katalog!
+            await bot.sendMessage(chatId, `✅ *Data Berhasil Disimpan!*\n\nMemproses profil Anda...`);
+            showCatalog(bot, chatId, sess.data);
+            break;
+    }
+    return true; // Pesan berhasil ditangkap oleh VIP System
+}
+
+function handleGenderSelect(bot, chatId, msgId, gender) {
+    if (!vipSessions[chatId] || vipSessions[chatId].step !== 'KELAMIN') return;
+    
+    vipSessions[chatId].data.kelamin = gender;
+    vipSessions[chatId].step = 'ASAL';
+    
+    bot.editMessageText(`🚻 Kelamin: *${gender}*\n\n📍 *Terakhir, dari Kota/Provinsi mana Anda berasal?*\n_(Contoh: Jakarta Selatan)_`, { chat_id: chatId, message_id: msgId, parse_mode: 'Markdown' });
+}
+
+// ==========================================
+// 2. KATALOG VIP CARD
+// ==========================================
+async function showCatalog(bot, chatId, userData) {
+    const formatRp = (angka) => 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    
+    const catalogMsg = 
+        `💳 *KATALOG FLEXINE VIP CARD*\n\n` +
+        `Silakan pilih tier VIP yang sesuai dengan kebutuhan Anda:\n\n` +
+        
+        `🥈 *1. VIP BIMSI (Silver)*\n` +
+        `├ Harga : ${formatRp(VIP_PRICES.bimsi)}\n` +
+        `└ Fitur : Get Akses Kode Lebih Awal\n\n` +
+        
+        `🥇 *2. VIP GIKO (Gold)*\n` +
+        `├ Harga : ${formatRp(VIP_PRICES.giko)}\n` +
+        `├ Fitur 1: Get Akses Kode Lebih Awal\n` +
+        `└ Fitur 2: Free Produk Bulanan\n\n` +
+        
+        `🖤 *3. VIP GAKU (Black Card)*\n` +
+        `├ Harga : ${formatRp(VIP_PRICES.gaku)}\n` +
+        `├ Fitur 1: Get Akses Kode Lebih Awal\n` +
+        `├ Fitur 2: Free Produk Bulanan\n` +
+        `├ Fitur 3: Akses Link Eksklusif 18+\n` +
+        `├ Fitur 4: Prioritas Jalur Antrean CS\n` +
+        `└ Fitur 5: Diskon Khusus Layanan\n\n` +
+        `👇 *Klik tombol di bawah untuk membeli:*`;
+
+    const vipMenu = {
+        inline_keyboard: [
+            [{ text: '🥈 BELI VIP BIMSI', callback_data: 'buy_vip_bimsi' }],
+            [{ text: '🥇 BELI VIP GIKO', callback_data: 'buy_vip_giko' }],
+            [{ text: '🖤 BELI VIP GAKU', callback_data: 'buy_vip_gaku' }],
+            [{ text: '❌ Batal', callback_data: 'cancel_vip' }]
+        ]
+    };
+
+    bot.sendMessage(chatId, catalogMsg, { parse_mode: 'Markdown', reply_markup: vipMenu });
+}
+
+// ==========================================
+// 3. GENERATOR GAMBAR KARTU (CANVAS)
+// ==========================================
+async function generateCard(name, tier, memberSinceStr) {
+    // Ukuran standar kartu (High Res)
+    const width = 1011;
+    const height = 638;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    // Desain Warna Berdasarkan Tier
+    let gradient = ctx.createLinearGradient(0, 0, width, height);
+    let textColor = '#FFFFFF';
+    let chipColor = '#D4AF37'; // Default chip emas
+
+    if (tier === 'BIMSI') {
+        // Silver / Navy Blue
+        gradient.addColorStop(0, '#0F2027');
+        gradient.addColorStop(0.5, '#203A43');
+        gradient.addColorStop(1, '#2C5364');
+        chipColor = '#E0E0E0'; // Chip perak
+    } else if (tier === 'GIKO') {
+        // Gold
+        gradient.addColorStop(0, '#BF953F');
+        gradient.addColorStop(0.5, '#FCF6BA');
+        gradient.addColorStop(1, '#B38728');
+        textColor = '#333333';
+        chipColor = '#FFE57F';
+    } else if (tier === 'GAKU') {
+        // Black Card
+        gradient.addColorStop(0, '#000000');
+        gradient.addColorStop(1, '#2B2B2B');
+        textColor = '#D4AF37'; // Teks Emas
+    }
+
+    // Background Utama
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Tambahkan Pattern Batik Halus (Simulasi dengan pattern garis/lingkaran)
+    ctx.globalAlpha = 0.05;
+    ctx.strokeStyle = tier === 'GIKO' ? '#000000' : '#FFFFFF';
+    for (let i = 0; i < width; i += 50) {
+        ctx.beginPath();
+        ctx.arc(i, height / 2, 200, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(width / 2, i, 300, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    ctx.globalAlpha = 1.0;
+
+    // Tulisan FLEXINE & TIER
+    ctx.fillStyle = textColor;
+    ctx.font = 'bold 50px Arial';
+    ctx.fillText('F L E X I N E', 60, 90);
+    
+    ctx.font = '30px Arial';
+    ctx.fillText('V I P   C A R D', 720, 90);
+
+    // Gambar Chip EMV
+    ctx.fillStyle = chipColor;
+    ctx.beginPath();
+    ctx.roundRect(80, 220, 120, 90, 15);
+    ctx.fill();
+    // Garis chip
+    ctx.strokeStyle = '#555555';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(80, 220, 120, 90);
+    ctx.strokeRect(100, 220, 80, 90);
+    ctx.strokeRect(80, 250, 120, 30);
+
+    // Teks DEBIT / TIER
+    ctx.fillStyle = textColor;
+    ctx.font = '30px Arial';
+    ctx.fillText(`TIER: ${tier}`, 230, 280);
+
+    // Nomor Kartu (Random untuk estetika)
+    const cardNum = `5198 93${Math.floor(Math.random()*90 + 10)} ${Math.floor(Math.random()*9000 + 1000)} ${Math.floor(Math.random()*9000 + 1000)}`;
+    ctx.font = 'bold 65px "Courier New", Courier, monospace';
+    // Beri efek shadow untuk nomor kartu
+    ctx.shadowColor = "rgba(0,0,0,0.5)";
+    ctx.shadowBlur = 5;
+    ctx.fillText(cardNum, 60, 420);
+    ctx.shadowBlur = 0; // reset shadow
+
+    // Member Since & Valid Thru
+    ctx.font = '22px Arial';
+    ctx.fillText('MEMBER', 60, 470);
+    ctx.fillText('SINCE', 60, 495);
+    ctx.font = 'bold 30px Arial';
+    ctx.fillText(memberSinceStr, 160, 485);
+
+    ctx.font = '22px Arial';
+    ctx.fillText('VALID', 300, 470);
+    ctx.fillText('THRU', 300, 495);
+    ctx.font = 'bold 30px Arial';
+    ctx.fillText('12/29', 380, 485);
+
+    // Nama Pemegang
+    ctx.font = 'bold 45px Arial';
+    ctx.fillText(name.toUpperCase(), 60, 570);
+
+    // Logo ala Mastercard di Kanan Bawah
+    ctx.globalAlpha = 0.8;
+    ctx.fillStyle = '#EB001B';
+    ctx.beginPath(); ctx.arc(820, 520, 60, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#F79E1B';
+    ctx.beginPath(); ctx.arc(890, 520, 60, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1.0;
+    
+    ctx.fillStyle = textColor;
+    ctx.font = 'italic 25px Arial';
+    ctx.fillText(tier === 'GAKU' ? 'exclusive' : 'premium', 800, 610);
+
+    return canvas.toBuffer('image/png');
+}
+
+// Export fungsi agar bisa dipakai di index.js
+module.exports = { startRegistration, handleInput, handleGenderSelect, generateCard, VIP_PRICES, vipSessions };
+
