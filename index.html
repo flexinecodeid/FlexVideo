@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS (Super Ringan) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -23,14 +23,12 @@
         }
     </script>
     
-    <!-- HANYA SUPABASE (Tidak ada GSAP / DOMPurify biar ga nge-lag di HP Kentang) -->
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body { background-color: #f3f4f6; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        
-        /* Drag Zone */
         .drop-zone { border: 2px dashed #cbd5e1; background-color: #f8fafc; transition: all 0.2s; }
         .drop-zone.dragover { border-color: #e11d48; background-color: #fff1f2; }
     </style>
@@ -43,7 +41,7 @@
         <p class="text-sm font-bold text-gray-500">Memuat FlexVideo...</p>
     </div>
 
-    <!-- Navbar Minimalis -->
+    <!-- Navbar -->
     <nav class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
         <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
             <button onclick="navigate('home')" class="font-heading text-xl font-bold text-brand-900 flex items-center gap-2">
@@ -66,7 +64,6 @@
                     </h1>
                     <p class="text-sm text-gray-600 font-medium">Video Anda bersifat rahasia (Unlisted).</p>
                 </div>
-
                 <h2 class="font-bold text-lg text-gray-800 mb-4 border-b border-gray-200 pb-2">Koleksi Video Anda</h2>
                 <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-12"></div>
             </div>
@@ -77,79 +74,60 @@
             <div class="max-w-2xl mx-auto px-4">
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-8">
                     <h2 class="font-heading text-xl font-bold text-brand-900 mb-1">Unggah Video Baru</h2>
-                    <p class="text-gray-500 text-xs mb-6 font-medium">Format: MP4, WebM | Maksimal: 500MB (± 10 Menit).</p>
+                    <p class="text-gray-500 text-xs mb-6 font-medium">Format: MP4, WebM | Maksimal: 500MB.</p>
                     
                     <form id="form-upload" onsubmit="handleUploadVideo(event)">
-                        <!-- Area Drag & Drop -->
                         <div id="drop-zone" class="drop-zone relative rounded-xl p-6 sm:p-10 mb-5 flex flex-col items-center justify-center cursor-pointer text-center">
                             <input type="file" id="video-input" accept="video/mp4,video/webm" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="handleFileSelect(event)">
-                            
                             <div id="upload-icon" class="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center mb-3 text-brand-900 shadow-sm">
                                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                             </div>
                             <p id="file-name-display" class="font-bold text-sm sm:text-base text-brand-900 mb-1">Pilih Video / Ketuk di sini</p>
                             <p id="file-size-display" class="text-xs text-gray-500">Maksimal 500MB</p>
-
-                            <!-- Overlay Loading -->
                             <div id="upload-progress-overlay" class="absolute inset-0 bg-white/95 z-20 flex flex-col items-center justify-center hidden">
                                 <div class="w-10 h-10 border-4 border-gray-200 border-t-red-600 rounded-full animate-spin mb-3"></div>
                                 <p class="font-bold text-brand-900 text-sm">Sedang Mengunggah...</p>
-                                <p class="text-[10px] sm:text-xs font-bold text-red-600 mt-1">Jangan tutup atau refresh halaman.</p>
                             </div>
                         </div>
 
                         <div class="mb-6">
                             <label class="block text-xs font-bold text-gray-500 mb-2">JUDUL VIDEO</label>
-                            <input type="text" id="input-title" required placeholder="Tulis judul..." 
-                                class="w-full text-base font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 focus:bg-white focus:border-red-600 outline-none">
+                            <input type="text" id="input-title" required placeholder="Tulis judul..." class="w-full text-base font-bold text-gray-900 bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 focus:bg-white focus:border-red-600 outline-none">
                         </div>
                         
                         <div class="flex flex-col-reverse sm:flex-row gap-2 pt-4 border-t border-gray-100">
                             <button type="button" onclick="navigate('home')" class="w-full sm:w-auto px-6 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm">Batal</button>
-                            <button type="submit" id="btn-publish" class="w-full sm:flex-1 bg-brand-900 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
-                                Dapatkan Link Video
-                            </button>
+                            <button type="submit" id="btn-publish" class="w-full sm:flex-1 bg-brand-900 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2">Dapatkan Link Video</button>
                         </div>
                     </form>
                 </div>
             </div>
         </section>
 
-        <!-- ================= NONTON VIDEO ================= -->
+        <!-- ================= NONTON VIDEO & 404 NOT FOUND ================= -->
         <section id="view-watch" class="hidden w-full py-4 sm:py-8">
             <div class="max-w-3xl mx-auto px-4">
                 <div class="flex items-center justify-between mb-4">
-                    <button onclick="navigate('home')" class="text-sm font-bold text-gray-700 bg-white px-4 py-2 rounded-lg border border-gray-300 shadow-sm flex items-center gap-1.5">
-                        <span>←</span> Kembali
-                    </button>
+                    <button onclick="navigate('home')" class="text-sm font-bold text-gray-700 bg-white px-4 py-2 rounded-lg border border-gray-300 shadow-sm flex items-center gap-1.5"><span>←</span> Kembali</button>
                     <div id="watch-actions"></div>
                 </div>
 
-                <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-3 sm:p-5">
-                    <!-- Player -->
+                <!-- AREA KONTEN (Bisa Video, Bisa 404) -->
+                <div id="watch-content-area" class="bg-white border border-gray-200 shadow-sm rounded-xl p-3 sm:p-5">
+                    <!-- Default Player -->
                     <div class="w-full aspect-video bg-black rounded-lg overflow-hidden mb-4">
-                        <video id="video-player" controls playsinline class="w-full h-full object-contain">
-                            <source id="video-source" src="" type="video/mp4">
-                        </video>
+                        <video id="video-player" controls playsinline class="w-full h-full object-contain"><source id="video-source" src="" type="video/mp4"></video>
                     </div>
-                    
                     <h1 id="watch-title" class="font-heading text-lg sm:text-2xl font-bold text-brand-900 mb-3 break-words leading-tight">Memuat...</h1>
-                    
                     <div class="flex items-center justify-between pt-3 border-t border-gray-100 flex-wrap gap-3">
                         <div class="flex items-center gap-2">
                             <div class="w-8 h-8 rounded-full bg-brand-900 text-white flex items-center justify-center text-xs font-bold" id="watch-avatar-letter">?</div>
                             <div>
                                 <p id="watch-author" class="font-bold text-sm text-gray-900 leading-none">Loading</p>
-                                <p class="text-[10px] text-gray-500 font-medium mt-1">
-                                    <span id="watch-date">...</span> • <span id="watch-views" class="font-bold">0</span> tayangan
-                                </p>
+                                <p class="text-[10px] text-gray-500 font-medium mt-1"><span id="watch-date">...</span> • <span id="watch-views" class="font-bold">0</span> tayangan</p>
                             </div>
                         </div>
-                        
-                        <button onclick="copyCurrentLink()" class="text-xs sm:text-sm bg-brand-900 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 active:scale-95 transition-transform">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                            Salin Link
-                         </button>
+                        <button onclick="copyCurrentLink()" class="text-xs sm:text-sm bg-brand-900 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1.5 active:scale-95 transition-transform">Salin Link</button>
                     </div>
                 </div>
             </div>
@@ -164,23 +142,9 @@
             
             <form onsubmit="submitReport(event)">
                 <div class="space-y-2 mb-5">
-                    <!-- Bebas Pornografi. Diganti jadi opsi umum -->
-                    <label class="block cursor-pointer">
-                        <input type="radio" name="report_reason" value="Kekerasan / Berbahaya" class="peer hidden" required>
-                        <div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🩸 Kekerasan / Berbahaya</div>
-                    </label>
-                    <label class="block cursor-pointer">
-                        <input type="radio" name="report_reason" value="Pelanggaran Privasi" class="peer hidden">
-                        <div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🕵️ Pelanggaran Privasi / Data Diri</div>
-                    </label>
-                    <label class="block cursor-pointer">
-                        <input type="radio" name="report_reason" value="Spam / Ilegal" class="peer hidden">
-                        <div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🤖 Spam / Konten Ilegal</div>
-                    </label>
-                    <label class="block cursor-pointer">
-                        <input type="radio" name="report_reason" value="Ujaran Kebencian" class="peer hidden">
-                        <div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🤬 Ujaran Kebencian</div>
-                    </label>
+                    <label class="block cursor-pointer"><input type="radio" name="report_reason" value="Kekerasan / Gore" class="peer hidden" required><div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🩸 Kekerasan / Gore</div></label>
+                    <label class="block cursor-pointer"><input type="radio" name="report_reason" value="Pornografi" class="peer hidden"><div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🔞 Pornografi</div></label>
+                    <label class="block cursor-pointer"><input type="radio" name="report_reason" value="Spam / Ilegal" class="peer hidden"><div class="px-3 py-2.5 border border-gray-200 rounded-lg text-sm font-medium peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">🤖 Spam / Konten Ilegal</div></label>
                 </div>
                 <div class="flex gap-2">
                     <button type="button" onclick="closeReportModal()" class="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-bold text-sm">Batal</button>
@@ -197,224 +161,142 @@
 
     <script>
         // ==========================================
-        // 1. INIT SUPABASE
+        // KONFIGURASI SUPABASE & TELEGRAM
         // ==========================================
         const SUPABASE_URL = 'https://tixewjhttuhzkhbegwwv.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpeGV3amh0dHVoemtoYmVnd3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjEyOTIsImV4cCI6MjA5MDE5NzI5Mn0.0Hs7yH3ppbzNyp4LUJknyBX7DcDkO6MWqj57NhT_trg';
+        
+        // ⚠️ MASUKAN DATA BOT KAMU DI SINI
+        const TELEGRAM_BOT_TOKEN = 'BOT_TOKEN_KAMU_DISINI'; 
+        const TELEGRAM_ADMIN_ID = 'ID_ADMIN_DISINI'; 
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const BUCKET_NAME = 'flexvideo-uploads'; 
 
-        let userVideosList = []; 
-        let currentUser = null; 
-        let selectedFile = null;
-        let currentWatchId = null;
+        let userVideosList = []; let currentUser = null; let selectedFile = null; let currentWatchId = null;
 
-        // Escape HTML untuk cegah serangan XSS (Pengganti DOMPurify yang berat)
         function escapeHTML(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initAuth();
-            setupDragAndDrop();
-        });
+        document.addEventListener('DOMContentLoaded', () => { initAuth(); setupDragAndDrop(); });
 
-        // ==========================================
-        // 2. AUTHENTICATION
-        // ==========================================
         async function initAuth() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             currentUser = session?.user || null;
             renderNavbar();
-
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                currentUser = session?.user || null;
-                renderNavbar();
-            });
-
+            supabaseClient.auth.onAuthStateChange((event, session) => { currentUser = session?.user || null; renderNavbar(); });
             handleUrlRouting(); 
         }
 
-        async function loginWithGoogle() {
-            showToast("Memuat Login...", "⏳");
-            await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
-        }
-
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            window.location.href = window.location.pathname;
-        }
+        async function loginWithGoogle() { await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } }); }
+        async function logout() { await supabaseClient.auth.signOut(); window.location.href = window.location.pathname; }
 
         function renderNavbar() {
             const nav = document.getElementById('nav-actions');
             if (currentUser) {
                 const name = escapeHTML(currentUser.user_metadata.full_name || 'User').split(' ')[0];
-                nav.innerHTML = `
-                    <span class="hidden sm:inline text-xs font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200">${name}</span>
-                    <button onclick="logout()" class="text-xs text-red-600 font-bold px-3 py-1.5 bg-red-50 rounded-lg">Keluar</button>
-                    <button onclick="navigate('upload')" class="bg-brand-900 text-white px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Unggah</button>
-                `;
+                nav.innerHTML = `<span class="hidden sm:inline text-xs font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">${name}</span><button onclick="logout()" class="text-xs text-red-600 font-bold px-3 py-1.5 bg-red-50 rounded-lg">Keluar</button><button onclick="navigate('upload')" class="bg-brand-900 text-white px-3 py-1.5 rounded-lg font-bold text-xs">Unggah</button>`;
             } else {
-                nav.innerHTML = `<button onclick="loginWithGoogle()" class="bg-brand-900 text-white px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/></svg> Login</button>`;
+                nav.innerHTML = `<button onclick="loginWithGoogle()" class="bg-brand-900 text-white px-4 py-1.5 rounded-lg font-bold text-xs">Login Google</button>`;
             }
         }
 
-        // ==========================================
-        // 3. ROUTING & TAMPILAN INSTAN
-        // ==========================================
         async function handleUrlRouting() {
             const idToWatch = new URLSearchParams(window.location.search).get('v'); 
-            if (idToWatch) {
-                await loadSingleVideo(idToWatch);
-            } else {
-                if(currentUser) await fetchUserVideos();
-                navigate('home', false);
-            }
+            if (idToWatch) await loadSingleVideo(idToWatch);
+            else { if(currentUser) await fetchUserVideos(); navigate('home', false); }
         }
 
         async function fetchUserVideos() {
-            try {
-                const { data } = await supabaseClient.from('videos').select('*').eq('user_id', currentUser.id).order('timestamp', { ascending: false });
-                userVideosList = data || [];
-            } catch (error) { console.error(error); }
+            try { const { data } = await supabaseClient.from('videos').select('*').eq('user_id', currentUser.id).order('timestamp', { ascending: false }); userVideosList = data || []; } catch (e) {}
         }
 
         function navigate(viewName, updateUrl = true) {
             if (viewName === 'upload' && !currentUser) return loginWithGoogle(); 
-            
-            // Matikan video jika keluar dari halaman watch
-            if (viewName !== 'watch') {
-                const player = document.getElementById('video-player');
-                player.pause(); player.removeAttribute('src'); player.load();
-            }
-
+            if (viewName !== 'watch') { const p = document.getElementById('video-player'); p.pause(); p.removeAttribute('src'); p.load(); }
             if (updateUrl && viewName === 'home') window.history.pushState({}, '', window.location.pathname);
-
-            // Hide semua section, Show yang dipilih (Instant CSS, 0 delay)
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${viewName}`).classList.remove('hidden');
-
-            if (viewName === 'home') {
-                document.getElementById('loading-screen').classList.add('hidden');
-                renderGrid();
-                resetFileUploadUI();
-            }
+            if (viewName === 'home') { document.getElementById('loading-screen').classList.add('hidden'); renderGrid(); resetFileUploadUI(); }
         }
 
         function renderGrid() {
             const grid = document.getElementById('video-grid');
-            if (!currentUser) return grid.innerHTML = `<div class="col-span-full text-center py-10 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-500">Login untuk mengelola video Anda.</div>`;
-            if (userVideosList.length === 0) return grid.innerHTML = `<div class="col-span-full text-center py-10 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-500">Belum ada video.</div>`;
-
+            if (!currentUser) return grid.innerHTML = `<div class="col-span-full text-center py-10 bg-white border border-gray-200 rounded-xl text-sm text-gray-500 font-bold">Login untuk kelola video.</div>`;
+            if (userVideosList.length === 0) return grid.innerHTML = `<div class="col-span-full text-center py-10 bg-white border border-gray-200 rounded-xl text-sm text-gray-500 font-bold">Belum ada video.</div>`;
+            
             let html = '';
             userVideosList.forEach(vid => {
-                html += `
-                    <div class="bg-white border border-gray-200 p-3 rounded-xl flex flex-col active:scale-95 transition-transform" onclick="window.location.href='?v=${vid.id}'">
-                        <div class="w-full aspect-video bg-gray-900 rounded-lg mb-2 relative flex items-center justify-center overflow-hidden">
-                            <div class="absolute bottom-1 left-1 text-white text-[9px] bg-black/60 px-1.5 py-0.5 rounded flex items-center gap-1 font-bold">👁 ${vid.views || 0}</div>
-                            <div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center shadow-sm"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="ml-0.5"><path d="M8 5v14l11-7z"/></svg></div>
-                        </div>
-                        <h3 class="text-sm font-bold text-gray-900 truncate mb-1">${escapeHTML(vid.title)}</h3>
-                        <div class="flex items-center justify-between text-[10px] text-gray-400 font-bold"><span>#${vid.id}</span><span>${vid.date}</span></div>
-                    </div>
-                `;
+                html += `<div class="bg-white border border-gray-200 p-3 rounded-xl flex flex-col active:scale-95 transition-transform" onclick="window.location.href='?v=${vid.id}'"><div class="w-full aspect-video bg-gray-900 rounded-lg mb-2 relative flex items-center justify-center overflow-hidden"><div class="absolute bottom-1 left-1 text-white text-[9px] bg-black/60 px-1.5 py-0.5 rounded font-bold">👁 ${vid.views || 0}</div><div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center shadow-sm"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="ml-0.5"><path d="M8 5v14l11-7z"/></svg></div></div><h3 class="text-sm font-bold text-gray-900 truncate mb-1">${escapeHTML(vid.title)}</h3><div class="flex items-center justify-between text-[10px] text-gray-400 font-bold"><span>#${vid.id}</span><span>${vid.date}</span></div></div>`;
             });
             grid.innerHTML = html;
         }
 
         // ==========================================
-        // 4. UPLOAD LOGIC (MAX 500MB)
+        // UPLOAD & WATCH LOGIC
         // ==========================================
         function setupDragAndDrop() {
-            const dropZone = document.getElementById('drop-zone');
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, prevDef, false));
+            const dz = document.getElementById('drop-zone');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dz.addEventListener(e, prevDef, false));
             function prevDef(e) { e.preventDefault(); e.stopPropagation(); }
-            ['dragenter', 'dragover'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.add('dragover'), false));
-            ['dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, () => dropZone.classList.remove('dragover'), false));
-            dropZone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
+            ['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, () => dz.classList.add('dragover'), false));
+            ['dragleave', 'drop'].forEach(e => dz.addEventListener(e, () => dz.classList.remove('dragover'), false));
+            dz.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
         }
-
         function handleFileSelect(e) { handleFiles(e.target.files); }
-
         function handleFiles(files) {
             if (files.length === 0) return;
             const file = files[0];
-            if (!['video/mp4', 'video/webm'].includes(file.type)) return alert("Hanya format MP4 / WebM.");
-            if (file.size > 500 * 1024 * 1024) return alert("Maksimal ukuran file 500MB!"); // Limit Dinaikkan
-
+            if (!['video/mp4', 'video/webm'].includes(file.type)) return alert("Format MP4/WebM saja.");
+            if (file.size > 500 * 1024 * 1024) return alert("Maks 500MB!"); 
             selectedFile = file;
             document.getElementById('file-name-display').textContent = file.name;
             document.getElementById('file-size-display').textContent = (file.size / (1024*1024)).toFixed(1) + " MB";
-            document.getElementById('upload-icon').classList.add('text-red-600', 'border-red-600');
-            
-            const titleInput = document.getElementById('input-title');
-            if(titleInput.value.trim() === '') titleInput.value = file.name.replace(/\.[^/.]+$/, "");
+            const ti = document.getElementById('input-title'); if(ti.value.trim()==='') ti.value = file.name.replace(/\.[^/.]+$/, "");
         }
-
-        function resetFileUploadUI() {
-            selectedFile = null;
-            if(document.getElementById('form-upload')) document.getElementById('form-upload').reset();
-            document.getElementById('file-name-display').textContent = "Pilih Video / Ketuk di sini";
-            document.getElementById('file-size-display').textContent = "Maksimal 500MB";
-            document.getElementById('upload-icon').classList.remove('text-red-600', 'border-red-600');
-            document.getElementById('upload-progress-overlay').classList.add('hidden');
-            document.getElementById('btn-publish').disabled = false;
-        }
+        function resetFileUploadUI() { selectedFile = null; if(document.getElementById('form-upload')) document.getElementById('form-upload').reset(); document.getElementById('file-name-display').textContent = "Pilih Video"; document.getElementById('upload-progress-overlay').classList.add('hidden'); document.getElementById('btn-publish').disabled = false; }
 
         async function handleUploadVideo(e) {
-            e.preventDefault();
-            if(!currentUser) return loginWithGoogle(); 
-            if(!selectedFile) return alert("Pilih video dulu!");
-
-            const title = document.getElementById('input-title').value.trim();
-            const btn = document.getElementById('btn-publish');
-            const overlay = document.getElementById('upload-progress-overlay');
-            
-            btn.disabled = true; 
-            overlay.classList.remove('hidden');
-
-            const fileExt = selectedFile.name.split('.').pop();
-            const shortId = Math.random().toString(36).substr(2, 6); 
+            e.preventDefault(); if(!currentUser) return loginWithGoogle(); if(!selectedFile) return alert("Pilih video!");
+            const btn = document.getElementById('btn-publish'); const overlay = document.getElementById('upload-progress-overlay');
+            btn.disabled = true; overlay.classList.remove('hidden');
+            const fileExt = selectedFile.name.split('.').pop(); const shortId = Math.random().toString(36).substr(2, 6); 
             const uniqueName = `${currentUser.id}/${Date.now()}_${shortId}.${fileExt}`;
-
             try {
-                const { error: storageErr } = await supabaseClient.storage.from(BUCKET_NAME).upload(uniqueName, selectedFile, { cacheControl: '3600', upsert: false });
-                if (storageErr) throw new Error("Gagal mengunggah file. Pastikan limit di Supabase sudah kamu ubah jadi 500MB.");
-
+                const { error: err1 } = await supabaseClient.storage.from(BUCKET_NAME).upload(uniqueName, selectedFile, { cacheControl: '3600', upsert: false });
+                if (err1) throw new Error("Gagal unggah.");
                 const { data: urlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(uniqueName);
-                
-                const newVideo = {
-                    id: shortId, user_id: currentUser.id, title: title, author: currentUser.user_metadata.full_name,
-                    video_url: urlData.publicUrl, file_path: uniqueName,
-                    date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-                    timestamp: Date.now(), views: 0
-                };
-
-                const { error: dbErr } = await supabaseClient.from('videos').insert([newVideo]);
-                if (dbErr) throw dbErr;
-
-                userVideosList.unshift(newVideo); 
-                window.location.href = `?v=${shortId}`; // Sukses, langsung nonton
-            } catch (err) {
-                alert(err.message);
-                btn.disabled = false; overlay.classList.add('hidden');
-            }
+                const newVideo = { id: shortId, user_id: currentUser.id, title: document.getElementById('input-title').value.trim(), author: currentUser.user_metadata.full_name, video_url: urlData.publicUrl, file_path: uniqueName, date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }), timestamp: Date.now(), views: 0 };
+                const { error: err2 } = await supabaseClient.from('videos').insert([newVideo]);
+                if (err2) throw err2;
+                window.location.href = `?v=${shortId}`; 
+            } catch (err) { alert(err.message); btn.disabled = false; overlay.classList.add('hidden'); }
         }
 
-        // ==========================================
-        // 5. WATCH & ACTIONS
-        // ==========================================
         async function loadSingleVideo(id) {
             try {
                 const { data: video, error } = await supabaseClient.from('videos').select('*').eq('id', id).single();
-                if (error || !video) throw new Error("Video tidak ditemukan");
+                
+                // JIKA VIDEO TIDAK ADA / ERROR (TAMPILKAN 404 NOT FOUND)
+                if (error || !video) {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    document.getElementById('watch-actions').innerHTML = '';
+                    document.getElementById('watch-content-area').innerHTML = `
+                        <div class="text-center py-16 px-4">
+                            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">🗑️</div>
+                            <h1 class="text-3xl font-extrabold text-brand-900 mb-2">Video Tidak Ditemukan</h1>
+                            <p class="text-sm text-gray-500 font-medium mb-8">Video ini mungkin telah dihapus oleh pemiliknya atau diturunkan oleh Admin karena melanggar pedoman.</p>
+                            <button onclick="navigate('home')" class="bg-brand-900 text-white px-6 py-3 rounded-xl font-bold">Kembali ke Beranda</button>
+                        </div>
+                    `;
+                    navigate('watch', false);
+                    return;
+                }
 
                 const newViews = (video.views || 0) + 1;
                 await supabaseClient.from('videos').update({ views: newViews }).eq('id', id);
                 video.views = newViews; 
 
                 document.getElementById('loading-screen').classList.add('hidden');
-                
-                // Tampilkan data ke HTML (Gunakan escapeHTML)
                 currentWatchId = video.id;
                 document.getElementById('watch-title').textContent = video.title;
                 document.getElementById('watch-author').textContent = video.author;
@@ -431,64 +313,62 @@
                 } else {
                     actionsDiv.innerHTML = `<button onclick="openReportModal()" class="text-xs bg-gray-100 text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg font-bold">Lapor</button>`;
                 }
-                
                 navigate('watch', false);
-            } catch (error) {
-                alert("Video tidak ditemukan.");
-                window.location.href = window.location.pathname; 
-            }
+            } catch (error) { alert("Terjadi kesalahan."); navigate('home'); }
         }
 
         async function deleteVideo(id, filePath) {
             if (!confirm("Hapus video ini permanen?")) return;
             showToast("Menghapus...", "⏳");
-            try {
-                await supabaseClient.storage.from(BUCKET_NAME).remove([filePath]);
-                await supabaseClient.from('videos').delete().eq('id', id);
-                window.location.href = window.location.pathname; 
-            } catch (error) { alert("Gagal menghapus."); }
+            try { await supabaseClient.storage.from(BUCKET_NAME).remove([filePath]); await supabaseClient.from('videos').delete().eq('id', id); window.location.href = window.location.pathname; } catch (e) { alert("Gagal."); }
         }
 
         // ==========================================
-        // 6. LAPOR & TOAST (Anti-Lag CSS Modal)
+        // REPORT SYSTEM (MENGIRIM KE TELEGRAM)
         // ==========================================
-        function openReportModal() {
-            if(!currentUser) return loginWithGoogle(); 
-            document.getElementById('report-modal').classList.remove('hidden');
-        }
-
-        function closeReportModal() {
-            document.getElementById('report-modal').classList.add('hidden');
-        }
+        function openReportModal() { if(!currentUser) return loginWithGoogle(); document.getElementById('report-modal').classList.remove('hidden'); }
+        function closeReportModal() { document.getElementById('report-modal').classList.add('hidden'); }
 
         async function submitReport(e) {
             e.preventDefault();
             const reason = document.querySelector('input[name="report_reason"]:checked').value;
             const btn = document.getElementById('btn-submit-report');
-            btn.innerHTML = "Wait..."; btn.disabled = true;
+            btn.innerHTML = "Mengirim..."; btn.disabled = true;
 
             try {
+                // 1. Simpan ke database Supabase (Opsional sbg backup)
                 const report = { video_id: currentWatchId, reporter_name: currentUser.user_metadata.full_name, reason: reason, timestamp: Date.now() };
                 await supabaseClient.from('reports').insert([report]);
+
+                // 2. KIRIM NOTIFIKASI KE BOT TELEGRAM ADMIN
+                const videoLink = window.location.href; // Dapatkan link video saat ini
+                const textMessage = `🚨 *LAPORAN VIDEO FLEXVIDEO* 🚨\n\n*Pelapor:* ${escapeHTML(currentUser.user_metadata.full_name)}\n*Alasan:* ${reason}\n*ID Video:* \`${currentWatchId}\`\n\n*Link Video:*\n${videoLink}`;
+                
+                const inlineKeyboard = {
+                    inline_keyboard: [[{ text: "🗑 Hapus Video Ini", callback_data: `delvid_${currentWatchId}` }]]
+                };
+
+                if(TELEGRAM_BOT_TOKEN !== 'BOT_TOKEN_KAMU_DISINI') {
+                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: TELEGRAM_ADMIN_ID,
+                            text: textMessage,
+                            parse_mode: 'Markdown',
+                            reply_markup: inlineKeyboard
+                        })
+                    });
+                }
+
                 closeReportModal();
-                showToast("Laporan terkirim.", "🛡️");
+                showToast("Laporan terkirim ke Admin.", "🛡️");
             } catch (error) { alert("Gagal lapor."); }
             btn.innerHTML = "Kirim"; btn.disabled = false;
         }
 
-        function showToast(msg, icon = "✅") {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-icon').textContent = icon;
-            document.getElementById('toast-msg').textContent = msg;
-            toast.classList.remove('translate-y-full', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-full', 'opacity-0'), 2500);
-        }
-
-        function copyCurrentLink() { 
-            const t = document.createElement("textarea"); t.value = window.location.href; document.body.appendChild(t); t.select(); 
-            document.execCommand('copy'); document.body.removeChild(t); 
-            showToast("Link disalin!", "🔗");
-        }
+        function showToast(msg, icon = "✅") { const toast = document.getElementById('toast'); document.getElementById('toast-icon').textContent = icon; document.getElementById('toast-msg').textContent = msg; toast.classList.remove('translate-y-full', 'opacity-0'); setTimeout(() => toast.classList.add('translate-y-full', 'opacity-0'), 2500); }
+        function copyCurrentLink() { const t = document.createElement("textarea"); t.value = window.location.href; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); showToast("Link disalin!", "🔗"); }
     </script>
 </body>
 </html>
