@@ -112,9 +112,8 @@
                     <div id="watch-actions"></div>
                 </div>
 
-                <!-- AREA KONTEN (Bisa Video, Bisa 404) -->
+                <!-- AREA KONTEN -->
                 <div id="watch-content-area" class="bg-white border border-gray-200 shadow-sm rounded-xl p-3 sm:p-5">
-                    <!-- Default Player -->
                     <div class="w-full aspect-video bg-black rounded-lg overflow-hidden mb-4">
                         <video id="video-player" controls playsinline class="w-full h-full object-contain"><source id="video-source" src="" type="video/mp4"></video>
                     </div>
@@ -161,14 +160,10 @@
 
     <script>
         // ==========================================
-        // KONFIGURASI SUPABASE & TELEGRAM
+        // KONFIGURASI SUPABASE (TANPA TOKEN TELEGRAM)
         // ==========================================
         const SUPABASE_URL = 'https://tixewjhttuhzkhbegwwv.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpeGV3amh0dHVoemtoYmVnd3d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjEyOTIsImV4cCI6MjA5MDE5NzI5Mn0.0Hs7yH3ppbzNyp4LUJknyBX7DcDkO6MWqj57NhT_trg';
-        
-        // ⚠️ MASUKAN DATA BOT KAMU DI SINI
-        const TELEGRAM_BOT_TOKEN = 'BOT_TOKEN_KAMU_DISINI'; 
-        const TELEGRAM_ADMIN_ID = 'ID_ADMIN_DISINI'; 
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const BUCKET_NAME = 'flexvideo-uploads'; 
@@ -324,7 +319,7 @@
         }
 
         // ==========================================
-        // REPORT SYSTEM (MENGIRIM KE TELEGRAM)
+        // REPORT SYSTEM PURE SUPABASE
         // ==========================================
         function openReportModal() { if(!currentUser) return loginWithGoogle(); document.getElementById('report-modal').classList.remove('hidden'); }
         function closeReportModal() { document.getElementById('report-modal').classList.add('hidden'); }
@@ -353,26 +348,6 @@
             } catch (error) { 
                 alert("Gagal lapor. Pastikan koneksi lancar."); 
             }
-            btn.innerHTML = "Kirim"; btn.disabled = false;
-        }
-
-
-                if(TELEGRAM_BOT_TOKEN !== '8624430665:AAHu0LEFyh8YAPZekN-9PWukUthvAk1rqzM') {
-                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            chat_id: TELEGRAM_ADMIN_ID,
-                            text: textMessage,
-                            parse_mode: 'Markdown',
-                            reply_markup: inlineKeyboard
-                        })
-                    });
-                }
-
-                closeReportModal();
-                showToast("Laporan terkirim ke Admin.", "🛡️");
-            } catch (error) { alert("Gagal lapor."); }
             btn.innerHTML = "Kirim"; btn.disabled = false;
         }
 
