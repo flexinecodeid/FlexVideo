@@ -336,19 +336,28 @@
             btn.innerHTML = "Mengirim..."; btn.disabled = true;
 
             try {
-                // 1. Simpan ke database Supabase (Opsional sbg backup)
-                const report = { video_id: currentWatchId, reporter_name: currentUser.user_metadata.full_name, reason: reason, timestamp: Date.now() };
-                await supabaseClient.from('reports').insert([report]);
-
-                // 2. KIRIM NOTIFIKASI KE BOT TELEGRAM ADMIN
-                const videoLink = window.location.href; // Dapatkan link video saat ini
-                const textMessage = `🚨 *LAPORAN VIDEO FLEXVIDEO* 🚨\n\n*Pelapor:* ${escapeHTML(currentUser.user_metadata.full_name)}\n*Alasan:* ${reason}\n*ID Video:* \`${currentWatchId}\`\n\n*Link Video:*\n${videoLink}`;
-                
-                const inlineKeyboard = {
-                    inline_keyboard: [[{ text: "🗑 Hapus Video Ini", callback_data: `delvid_${currentWatchId}` }]]
+                // CUKUP SIMPAN KE SUPABASE. 
+                // Bot Node.js kamu yang jalan 24 jam akan otomatis mendeteksinya via Realtime!
+                const report = { 
+                    video_id: currentWatchId, 
+                    reporter_name: currentUser.user_metadata.full_name, 
+                    reason: reason, 
+                    timestamp: Date.now() 
                 };
+                
+                const { error } = await supabaseClient.from('reports').insert([report]);
+                if(error) throw error;
 
-                if(TELEGRAM_BOT_TOKEN !== 'BOT_TOKEN_KAMU_DISINI') {
+                closeReportModal();
+                showToast("Laporan terkirim ke Admin.", "🛡️");
+            } catch (error) { 
+                alert("Gagal lapor. Pastikan koneksi lancar."); 
+            }
+            btn.innerHTML = "Kirim"; btn.disabled = false;
+        }
+
+
+                if(TELEGRAM_BOT_TOKEN !== '8624430665:AAHu0LEFyh8YAPZekN-9PWukUthvAk1rqzM') {
                     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
